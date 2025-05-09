@@ -26,7 +26,7 @@ export class AuthController {
     ) {
         const existingUser = await this.userService.findUserByEmail(body.email);
         if (existingUser) {
-            throw new ConflictException('Email is already registered');
+            throw new ConflictException({message: 'Email is already registered', errors: null });
         }
         const token = await this.authService.register(body)
         req.customMessage = 'Successfully register';

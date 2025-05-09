@@ -16,19 +16,22 @@ import {
       let status = HttpStatus.INTERNAL_SERVER_ERROR;
       let message = 'Internal server error';
       let success: boolean = true;
+      let valuedata: null = null
       
       if (exception instanceof HttpException) {
         success = false
         status = exception.getStatus();
         const res = exception.getResponse();
         message = typeof res === 'string' ? res : (res as any).message;
+        valuedata = typeof res === 'string' ? res : (res as any).errors;
       }
   
       response.status(status).json({
         statusCode: status,
         success,
         message,
-        data: null,
+        data: valuedata,
+        timestamp: new Date()
       });
     }
   }
