@@ -12,6 +12,11 @@ model user {
   email    String  @unique
   password String
   name     String
-  role     String  @default("user")
+  role     Role  @default(ADMIN)
   createdAt DateTime @default(now())
+}
+enum Role {
+  GUEST
+  ADMIN
+  OPERATOR
 }

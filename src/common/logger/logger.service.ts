@@ -29,7 +29,20 @@ export class LoggerService {
     });
   }
 
-  log(message: any) {
+  logInfo(message: any) {
     this.logger.info(message);
+  }
+
+  logError(message: any) {
+    this.logger.error(message);
+  }
+  logWarning(message: any) {
+    this.logger.warn(message);
+  }
+  logDebug(message: any) {
+    this.logger.debug(message);
+  }
+  logSilly(message: any) {
+    this.logger.silly(message);
   }
 }

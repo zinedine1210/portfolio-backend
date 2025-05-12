@@ -10,10 +10,19 @@ export class UsersService {
     ){}
 
     async findUserByEmail(email: string) {
-        this.logger.log(`Search user with email: ${email}`);
+        // this.logger.logInfo(`Search user with email: ${email}`);
         return this.prisma.user.findUnique({
             where: {
                 email,
+            }
+        })
+    }
+
+    async findUserById(id: number) {
+        // this.logger.logInfo(`Search user with id: ${id}`);
+        return this.prisma.user.findUnique({
+            where: {
+                id,
             }
         })
     }

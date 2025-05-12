@@ -12,10 +12,13 @@ export class ZodExceptionFilter implements ExceptionFilter {
   catch(exception: ZodError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const formattedErrors = exception.errors.map((err) => ({
-      path: err.path.join('.'),
-      message: err.message,
-    }));
+    const formattedErrors: { path: string, message: string }[] = []
+    exception.errors.map((err) => (
+      formattedErrors.push({
+        path: err.path.join('.'),
+        message: err.message
+      })
+    ));
 
     
     return response.status(HttpStatus.BAD_REQUEST).json({

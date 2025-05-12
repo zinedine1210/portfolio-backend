@@ -1,0 +1,25 @@
+@token =        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM5LCJlbWFpbCI6ImZhdGhpckBnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NDcwMDc1MDAsImV4cCI6MTc0NzA5MzkwMH0.Qm6hi8jCr6C5q2OkrrpzEdFcXDKtFIWc4aEMl4m2qgI
+
+@host = localhost
+@port = 9090
+@prefix = api
+@baseUrl = http://{{host}}:{{port}}/{{prefix}}
+
+### Create User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+{
+    "email": "zinedine@gmail.com",
+    "password": "admin123",
+    "name": "Zinedine Ziddan"
+}
+
+###
+GET {{baseUrl}}/auth/halo
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{token}}

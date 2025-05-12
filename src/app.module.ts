@@ -1,14 +1,14 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
-import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConnectionService, createConnection } from './common/connection/connection.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from './common/logger/logger.module';
+import { AuthMiddleware } from './common/middleware/auth/auth.middleware';
+import { LoggerService } from './common/logger/logger.service';
 
 @Module({
   imports: [
@@ -23,6 +23,7 @@ import { LoggerModule } from './common/logger/logger.module';
   providers: [
     AppService, 
     PrismaService,
+    LoggerService,
     {
       provide: ConnectionService,
       useFactory: createConnection,
@@ -30,4 +31,13 @@ import { LoggerModule } from './common/logger/logger.module';
     },
   ]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes({
+      path: '/api/auth/*',
+      method: RequestMethod.ALL,
+    });
+  }
+}

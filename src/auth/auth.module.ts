@@ -3,15 +3,14 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { LoggerService } from 'src/common/logger/logger.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' }
+      signOptions: { expiresIn: `${process.env.JWT_EXPIRATION}` }
     })
   ],
   controllers: [AuthController],

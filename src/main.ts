@@ -5,11 +5,12 @@ import { ZodExceptionFilter } from './common/filters/zod-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { GlobalHttpExceptionFilter } from './common/filters/global-exception.filter';
 import { ConfigService } from '@nestjs/config';
+import { LoggerService } from './common/logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser())
-  app.useGlobalFilters(new ZodExceptionFilter(), new GlobalHttpExceptionFilter());
+  app.useGlobalFilters(new ZodExceptionFilter(), new GlobalHttpExceptionFilter(new LoggerService()));
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   const configService = app.get(ConfigService);
