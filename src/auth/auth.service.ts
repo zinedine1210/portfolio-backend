@@ -1,17 +1,16 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { LoggerService } from 'src/common/logger/logger.service';
 import { User } from '@prisma/client';
 import { UsersService } from 'src/users/users/users.service';
 import { RegisterUserDTO } from './dto/register.dto';
 import { LoginUserDTO } from './dto/login.dto';
+import { LoginResponse, RegisterResponse } from './response/index.response';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private prisma: PrismaService,
         private userService: UsersService,
         private jwtService: JwtService,
         private readonly logger: LoggerService,
@@ -24,14 +23,16 @@ export class AuthService {
             throw new ConflictException({ message: 'Email is already registered', errors: null });
         }
         const hashed = await bcrypt.hash(password, 10);
-        const user = await this.prisma.user.create({
-            data: { email, password: hashed, name },
-        });
+        const user = await this.userService.createUser({
+            email,
+            password: hashed,
+            name
+        })
         this.logger.logInfo(`User ${email} registered ${user ? 'SUCCESS': 'FAILED'}`)
         return user;
     }
 
-    async login(data: LoginUserDTO): Promise<Record<string, any>> {
+    async login(data: LoginUserDTO): Promise<LoginResponse> {
         const { email, password } = data;
         const user = await this.userService.findUserByEmail(email);
         this.logger.logInfo(`Try to login with email: ${email}, and ${!user ? 'FAILED': 'SUCCESS'} login`);
@@ -41,7 +42,7 @@ export class AuthService {
         return this.getToken(user);
     }
 
-    async getUserById(id: number): Promise<any> {
+    async getUserById(id: number): Promise<RegisterResponse> {
         const user = await this.userService.findUserById(id);
         this.logger.logInfo(`Get user with id: ${id}, ${user ? 'SUCCESS': 'FAILED'}`);
         if (!user) {
@@ -55,7 +56,7 @@ export class AuthService {
         };
     }
 
-    private getToken(user: User): { access_token: string } {
+    private getToken(user: User): LoginResponse{
         const payload = {
             sub: user.id,
             email: user.email,

@@ -5,3 +5,10 @@ export interface ApiResponse<T = any> {
   data?: T;
   success: boolean
 }
+
+export interface ApiResponseWithPagination<T = any> {
+  total: number;
+  page: number;
+  limit: number;
+  data: T;
+}

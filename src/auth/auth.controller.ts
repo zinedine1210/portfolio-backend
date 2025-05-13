@@ -8,6 +8,8 @@ import { Roles } from 'src/common/roles/roles.decorator';
 import { User } from 'src/common/decorators/user/user.decorator';
 import { LoginUserDTO } from './dto/login.dto';
 import { Role } from '@prisma/client';
+import { RegisterResponse } from './response/index.response';
+import { UserResponse } from 'src/common/decorators/user/user.response';
 
 @Controller('api/auth')
 export class AuthController {
@@ -33,17 +35,9 @@ export class AuthController {
     @Post('login')
     async login(
         @Body() body: LoginUserDTO,
-        // @Res({ passthrough: true }) res: Response,
         @Req() req: any
     ) {
-        const result = await this.authService.login(body); // hasil JWT
-
-        // res.cookie('token', token, {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === 'production',
-        //     sameSite: 'strict',
-        //     maxAge: 1000 * 60 * 60, // 1 jam
-        // });
+        const result = await this.authService.login(body);
 
         req.customMessage = 'Successfully login'
         return {
@@ -66,9 +60,9 @@ export class AuthController {
     // @UseGuards(RolesGuard)
     // @Roles(Role.OPERATOR, Role.GUEST)
     async getMe(
-        @User() user: any,
+        @User() user: UserResponse,
         @Req() req: any
-    ) {
+    ): Promise<RegisterResponse> {
         const result = await this.authService.getUserById(user.id);
         req.customMessage = 'Successfully get user';
         return {
@@ -80,7 +74,7 @@ export class AuthController {
     @UseGuards(RolesGuard)
     @Roles(Role.ADMIN)
     async handleGet(
-        @User() user: any
+        @User() user: UserResponse
     ) {
         // const users = await this.prisma.user.findMany();
         // console.log(users);  // Cek di konsol apakah ada data

@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from './common/logger/logger.module';
 import { AuthMiddleware } from './common/middleware/auth/auth.middleware';
 import { LoggerService } from './common/logger/logger.service';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LoggerService } from './common/logger/logger.service';
       isGlobal: true,
     }),
     LoggerModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -36,7 +38,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthMiddleware)
       .forRoutes({
-      path: '/api/auth/*',
+      path: '/api/*path',
       method: RequestMethod.ALL,
     });
   }

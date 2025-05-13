@@ -7,16 +7,42 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model user {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  name     String
-  role     Role  @default(ADMIN)
-  createdAt DateTime @default(now())
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  name      String
+  role      Role      @default(ADMIN)
+  createdAt DateTime  @default(now())
+  projects  Project[]
+  skills    Skill[]
 }
+
 enum Role {
   GUEST
   ADMIN
   OPERATOR
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  link        String? // GitHub atau demo link
+  imageUrl    String? // File upload (URL atau path)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+}
+
+model Skill {
+  id        Int      @id @default(autoincrement())
+  name      String
+  level     Int // misalnya skala 1-5
+  category  String // "soft" atau "hard"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
 }
