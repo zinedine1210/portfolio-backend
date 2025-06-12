@@ -7,15 +7,23 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// User model untuk autentikasi
 model User {
-  id        Int       @id @default(autoincrement())
+  id        String    @id @default(uuid())
   email     String    @unique
   password  String
-  name      String
+  profile   Profile?
   role      Role      @default(ADMIN)
-  createdAt DateTime  @default(now())
-  projects  Project[]
-  skills    Skill[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+enum Gender {
+  MAN
+  WOMAN
+  OTHER
 }
 
 enum Role {
@@ -24,25 +32,175 @@ enum Role {
   OPERATOR
 }
 
-model Project {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  link        String? // GitHub atau demo link
-  imageUrl    String? // File upload (URL atau path)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
+// Profile model untuk informasi profil
+model Profile {
+  id        String    @id @default(uuid())
+  userId    String    @unique @map("user_id")
+  title     String
+  name      String
+  telephone String
+  location  String
+  age       Int
+  gender    Gender    @default(MAN)
+  about     String?   @db.Text
+  resumeUrl String?   @map("resume_url")
+  websiteUrl  String?   @map("website_url")
+  imageUrl  String?   @map("image_url")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills    ProfileSkill[]
+  contacts  Contact[]
+  projects  Project[]
+  blogPosts BlogPost[]
+  files     File[]
+
+  @@map("profiles")
 }
 
+// Skill model untuk daftar skill
 model Skill {
-  id        Int      @id @default(autoincrement())
-  name      String
-  level     Int // misalnya skala 1-5
-  category  String // "soft" atau "hard"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
+  id        String    @id @default(uuid())
+  name      String    @unique
+  category  String?
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  profiles  ProfileSkill[]
+  projects  ProjectSkill[]
+
+  @@map("skills")
 }
+
+// Junction table untuk profile dan skill dengan level keahlian
+model ProfileSkill {
+  profileId        String   @map("profile_id")
+  skillId          String   @map("skill_id")
+  proficiencyLevel Int      @map("proficiency_level")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  profile          Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill            Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, skillId])
+  @@map("profile_skills")
+}
+
+// Contact model untuk informasi kontak
+model Contact {
+  id        String   @id @default(uuid())
+  profileId String   @map("profile_id")
+  type      String   // email, github, linkedin, twitter, etc.
+  value     String
+  icon      String
+  isPublic  Boolean  @default(true) @map("is_public")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("contacts")
+}
+
+// Project model untuk portfolio projects
+model Project {
+  id          String    @id @default(uuid())
+  profileId   String    @map("profile_id")
+  title       String
+  slug        String    @unique
+  description String?   @db.Text
+  content     String?   @db.Text
+  imageUrl    String?   @map("image_url")
+  githubUrl   String?   @map("github_url")
+  liveUrl     String?   @map("live_url")
+  isFeatured  Boolean   @default(false) @map("is_featured")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skills      ProjectSkill[]
+
+  @@map("projects")
+}
+
+// Junction table untuk project dan skill
+model ProjectSkill {
+  projectId String   @map("project_id")
+  skillId   String   @map("skill_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, skillId])
+  @@map("project_skills")
+}
+
+// BlogPost model untuk blog posts
+model BlogPost {
+  id          String    @id @default(uuid())
+  profileId   String    @map("profile_id")
+  title       String
+  slug        String    @unique
+  content     String?   @db.Text
+  excerpt     String?   @db.Text
+  status      String    @default("draft") // draft, published
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tags        BlogPostTag[]
+
+  @@map("blog_posts")
+}
+
+// Tag model untuk blog post tags
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  blogPosts BlogPostTag[]
+
+  @@map("tags")
+}
+
+// Junction table untuk blog post dan tag
+model BlogPostTag {
+  postId    String   @map("post_id")
+  tagId     String   @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("blog_post_tags")
+}
+
+// File model untuk mengelola file uploads
+model File {
+  id           String   @id @default(uuid())
+  profileId    String   @map("profile_id")
+  filename     String
+  originalName String   @map("original_name")
+  mimeType     String   @map("mime_type")
+  size         BigInt
+  path         String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("files")
+} 
