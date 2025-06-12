@@ -1,7 +1,10 @@
 import { Role } from "@prisma/client";
 
 export interface UserResponse {
-    id: number,
+    id: string,
     email: string,
-    role: Role
+    role: Role,
+    profile?: {
+        id: string;
+    }
 }

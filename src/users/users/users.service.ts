@@ -20,7 +20,7 @@ export class UsersService {
         })
     }
 
-    async findUserById(id: number) {
+    async findUserById(id: string) {
         // this.logger.logInfo(`Search user with id: ${id}`);
         return this.prisma.user.findUnique({
             where: {
@@ -34,9 +34,9 @@ export class UsersService {
     }
 
     async createUser(data: RegisterUserDTO) {
-        const { email, password, name } = data;
+        const { email, password } = data;
         const newUser = await this.prisma.user.create({
-            data: { email, password, name }
+            data: { email, password }
         })
         this.logger.logInfo(`New user created with email: ${email}`);
         return newUser;

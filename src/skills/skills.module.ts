@@ -1,20 +1,20 @@
 import { Module } from '@nestjs/common';
-import { ProjectsController } from './projects.controller';
-import { ProjectsService } from './projects.service';
+import { SkillsController } from './skills.controller';
+import { SkillsService } from './skills.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoggerService } from '../common/logger/logger.service';
 import { ApiResponseMessage } from '../common/utils/message.response';
-import { ProfileService } from '../profile/profile.service';
+import { ProfileService } from 'src/profile/profile.service';
 
 @Module({
-  controllers: [ProjectsController],
+  controllers: [SkillsController],
   providers: [
-    ProjectsService,
+    SkillsService,
     PrismaService,
     LoggerService,
     ApiResponseMessage,
     ProfileService
   ],
-  exports: [ProjectsService]
+  exports: [SkillsService]
 })
-export class ProjectsModule {}
+export class SkillsModule {}

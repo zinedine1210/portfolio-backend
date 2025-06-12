@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards, UsePipes } from '@nestjs/common';
-import { ProjectsService } from './projects.service';
-import { BulkDeleteProjectDto, BulkDeleteProjectSchema, CreateProjectDto, CreateProjectSchema, UpdateProjectDto, UpdateProjectSchema } from './dto/zod.schema';
+import { ProfileSkillsService } from './profile-skills.service';
+import { BulkDeleteProfileSkillDto, BulkDeleteProfileSkillSchema, CreateProfileSkillDto, CreateProfileSkillSchema, UpdateProfileSkillDto, UpdateProfileSkillSchema } from './dto/zod.schema';
 import { User } from '../common/decorators/user/user.decorator';
 import { UserResponse } from '../common/decorators/user/user.response';
-import { Project, Role } from '@prisma/client';
+import { ProfileSkill, Role } from '@prisma/client';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { RolesGuard } from '../common/roles/roles.guard';
 import { Roles } from '../common/roles/roles.decorator';
@@ -13,25 +13,25 @@ import { ApiResponseWithPagination } from '../common/types/response.type';
 import { RequestMethod } from '@nestjs/common';
 import { ProfileService } from '../profile/profile.service';
 
-@Controller('/api/projects')
+@Controller('/api/profile-skills')
 @UseGuards(RolesGuard)
 @Roles(Role.ADMIN)
-export class ProjectsController {
+export class ProfileSkillsController {
     constructor(
-        private projectsService: ProjectsService,
+        private profileSkillsService: ProfileSkillsService,
         private profileService: ProfileService,
         private readonly apiResponseMessage: ApiResponseMessage
     ) { }
 
     @Post('create')
-    @UsePipes(new ZodValidationPipe(CreateProjectSchema))
+    @UsePipes(new ZodValidationPipe(CreateProfileSkillSchema))
     async create(
-        @Body() body: CreateProjectDto,
+        @Body() body: CreateProfileSkillDto,
         @User() user: UserResponse,
         @Req() req: any
-    ): Promise<Project> {
+    ): Promise<ProfileSkill> {
         const profile = await this.profileService.getByUserId(user.id);
-        const result = await this.projectsService.create({ 
+        const result = await this.profileSkillsService.create({ 
             profileId: profile.id, 
             data: body 
         });
@@ -45,9 +45,9 @@ export class ProjectsController {
         @Body() body: PaginationDto,
         @User() user: UserResponse,
         @Req() req: any
-    ): Promise<ApiResponseWithPagination<Project[]>> {
+    ): Promise<ApiResponseWithPagination<ProfileSkill[]>> {
         const profile = await this.profileService.getByUserId(user.id);
-        const result = await this.projectsService.getAll({
+        const result = await this.profileSkillsService.getAll({
             query: body,
             profileId: profile.id
         });
@@ -58,15 +58,15 @@ export class ProjectsController {
         return result;
     }
 
-    @Get(':id')
+    @Get(':skillId')
     async getById(
-        @Param('id') id: string,
+        @Param('skillId') skillId: string,
         @User() user: UserResponse,
         @Req() req: any
-    ): Promise<Project | null> {
+    ): Promise<ProfileSkill | null> {
         const profile = await this.profileService.getByUserId(user.id);
-        const result = await this.projectsService.getById({
-            id,
+        const result = await this.profileSkillsService.getById({
+            skillId,
             profileId: profile.id
         });
         req.customMessage = this.apiResponseMessage.getMessage(RequestMethod.GET, 'SUCCESS');
@@ -76,30 +76,17 @@ export class ProjectsController {
         return result;
     }
 
-    @Get('slug/:slug')
-    async getBySlug(
-        @Param('slug') slug: string,
-        @Req() req: any
-    ): Promise<Project | null> {
-        const result = await this.projectsService.getBySlug(slug);
-        req.customMessage = this.apiResponseMessage.getMessage(RequestMethod.GET, 'SUCCESS');
-        if (!result) {
-            req.customMessage = this.apiResponseMessage.getMessage(RequestMethod.GET, 'ERROR');
-        }
-        return result;
-    }
-
-    @Patch(':id')
-    @UsePipes(new ZodValidationPipe(UpdateProjectSchema))
+    @Patch(':skillId')
+    @UsePipes(new ZodValidationPipe(UpdateProfileSkillSchema))
     async update(
-        @Param('id') id: string,
-        @Body() body: UpdateProjectDto,
+        @Param('skillId') skillId: string,
+        @Body() body: UpdateProfileSkillDto,
         @User() user: UserResponse,
         @Req() req: any
-    ): Promise<Project> {
+    ): Promise<ProfileSkill> {
         const profile = await this.profileService.getByUserId(user.id);
-        const result = await this.projectsService.update({
-            id,
+        const result = await this.profileSkillsService.update({
+            skillId,
             profileId: profile.id,
             data: body
         });
@@ -107,15 +94,15 @@ export class ProjectsController {
         return result;
     }
 
-    @Delete(':id')
+    @Delete(':skillId')
     async delete(
-        @Param('id') id: string,
+        @Param('skillId') skillId: string,
         @User() user: UserResponse,
         @Req() req: any
-    ): Promise<Project> {
+    ): Promise<ProfileSkill> {
         const profile = await this.profileService.getByUserId(user.id);
-        const result = await this.projectsService.delete({
-            id,
+        const result = await this.profileSkillsService.delete({
+            skillId,
             profileId: profile.id
         });
         req.customMessage = this.apiResponseMessage.getMessage(RequestMethod.DELETE, 'SUCCESS');
@@ -123,18 +110,18 @@ export class ProjectsController {
     }
 
     @Delete('/delete/bulk')
-    @UsePipes(new ZodValidationPipe(BulkDeleteProjectSchema))
+    @UsePipes(new ZodValidationPipe(BulkDeleteProfileSkillSchema))
     async deleteBulk(
-        @Body() body: BulkDeleteProjectDto,
+        @Body() body: BulkDeleteProfileSkillDto,
         @User() user: UserResponse,
         @Req() req: any
     ): Promise<number> {
         const profile = await this.profileService.getByUserId(user.id);
-        const result = await this.projectsService.deleteBulk({
+        const result = await this.profileSkillsService.deleteBulk({
             data: body,
             profileId: profile.id
         });
         req.customMessage = this.apiResponseMessage.getMessage(RequestMethod.DELETE, 'SUCCESS');
         return result;
     }
-}
+} 
