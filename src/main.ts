@@ -13,6 +13,14 @@ async function bootstrap() {
   app.useGlobalFilters(new ZodExceptionFilter(), new GlobalHttpExceptionFilter(new LoggerService()));
   app.useGlobalInterceptors(new ResponseInterceptor());
 
+  // Enable CORS
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
+
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
   await app.listen(port);

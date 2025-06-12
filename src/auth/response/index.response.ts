@@ -1,9 +1,8 @@
 import { Role } from "@prisma/client";
 
 export interface RegisterResponse {
-    id: number,
+    id: string,
     email: string,
-    name: string,
     role: Role
 }
 

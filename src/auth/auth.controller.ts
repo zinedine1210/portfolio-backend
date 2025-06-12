@@ -26,8 +26,7 @@ export class AuthController {
         const result = await this.authService.register(body)
         req.customMessage = 'Successfully register';
         return {
-            email: result.email,
-            name: result.name
+            email: result.email
         }
     }
 

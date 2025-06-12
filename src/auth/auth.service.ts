@@ -17,7 +17,7 @@ export class AuthService {
     ) {}
 
     async register(data: RegisterUserDTO): Promise<User> {
-        const { email, password, name } = data;
+        const { email, password } = data;
         const existingUser = await this.userService.findUserByEmail(email);
         if (existingUser) {
             throw new ConflictException({ message: 'Email is already registered', errors: null });
@@ -25,8 +25,7 @@ export class AuthService {
         const hashed = await bcrypt.hash(password, 10);
         const user = await this.userService.createUser({
             email,
-            password: hashed,
-            name
+            password: hashed
         })
         this.logger.logInfo(`User ${email} registered ${user ? 'SUCCESS': 'FAILED'}`)
         return user;
@@ -42,7 +41,7 @@ export class AuthService {
         return this.getToken(user);
     }
 
-    async getUserById(id: number): Promise<RegisterResponse> {
+    async getUserById(id: string): Promise<RegisterResponse> {
         const user = await this.userService.findUserById(id);
         this.logger.logInfo(`Get user with id: ${id}, ${user ? 'SUCCESS': 'FAILED'}`);
         if (!user) {
@@ -51,7 +50,6 @@ export class AuthService {
         return {
             id: user.id,
             email: user.email,
-            name: user.name,
             role: user.role,
         };
     }
